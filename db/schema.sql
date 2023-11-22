@@ -8,6 +8,15 @@ CREATE TABLE IF NOT EXISTS users (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS auth_tokens (
+	user_id int not null,
+	access_token varchar(100) not null,
+	refresh_token varchar(100) not null,
+	expiration timestamp with time zone not null,
+	FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
+
+
 CREATE TABLE IF NOT EXISTS lists (
 	list_id serial primary key,
 	name varchar(100) not null,
