@@ -51,7 +51,7 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	r.Get("/done", func(w http.ResponseWriter, r *http.Request) {
+	r.With(auth.AuthedWithGoogle).Get("/done", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("in protected route"))
 	})
 

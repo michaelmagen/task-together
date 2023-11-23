@@ -113,18 +113,22 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/done", http.StatusFound)
 }
 
+// Gets user information from google api using auth token
 func getUserInfo(token *oauth2.Token) (*model.User, error) {
+	// Request info from google
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
+	// Read in the response
 	response, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Unmarhsall json into a User struct
 	var user model.User
 	err = json.Unmarshal(response, &user)
 	if err != nil {
@@ -132,4 +136,73 @@ func getUserInfo(token *oauth2.Token) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+// Ensures user is authenticated and adds user ID to request context
+func AuthedWithGoogle(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Find the current session for user
+		session, err := configs.SessionStore.Get(r, viper.GetString("sessionName"))
+		if err != nil {
+			log.Error("Failed to get sessino in auth middleware", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Check if userId and token exist in the session
+		userID, okUserID := session.Values["userId"].(string)
+		token, okToken := session.Values["token"].(*oauth2.Token)
+
+		if !okUserID || !okToken {
+			log.Error("could not find token or id in session")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Refresh token if need and update session
+		newToken, tokenWasRefreshed, err := refreshAuthToken(token)
+		if err != nil {
+			log.Error("failed to refresh token", err)
+			http.Error(w, "Unathorized", http.StatusUnauthorized)
+			return
+		}
+
+		// If the token is refreshed, then save new token to session
+		if tokenWasRefreshed {
+			session.Values["token"] = newToken
+			err = session.Save(r, w)
+			if err != nil {
+				log.Error("failed to save session in auth middleware:", err)
+				http.Error(w, "Unathorized", http.StatusUnauthorized)
+				return
+			}
+		}
+
+		// If authenticated, store user information in the context for later use
+		ctx := context.WithValue(r.Context(), "userId", userID)
+
+		// Call the next handler
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// Attempt to refresh auth token. If token still valid, returns same token. Otherwise refreshes the token
+func refreshAuthToken(token *oauth2.Token) (*oauth2.Token, bool, error) {
+	isNewToken := false
+	// If the token is no longer valid, attempt to refresh the token
+	if !token.Valid() {
+		// Create token source that can refresh tokens
+		tokenSource := oauthConfGl.TokenSource(context.Background(), token)
+
+		// Attempt to refresh the token
+		refreshedToken, err := tokenSource.Token()
+		if err != nil {
+			return nil, false, err
+		}
+
+		// Set the token var to the new token
+		isNewToken = true
+		token = refreshedToken
+	}
+	return token, isNewToken, nil
 }
