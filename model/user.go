@@ -1,7 +1,9 @@
 package model
 
+type UserID string
+
 type User struct {
-	UserId        string `json:"id"`
+	UserID        UserID `json:"id"`
 	Email         string `json:"email"`
 	VerifiedEmail bool   `json:"verified_email"`
 	Name          string `json:"name"`
@@ -15,9 +17,22 @@ type User struct {
 func CreateUserIfNotExist(user *User) error {
 	statement := "INSERT INTO users (user_id, email, verified_email, name, given_name, family_name, picture, locale) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (user_id) DO NOTHING"
 
-	_, err := db.Exec(statement, user.UserId, user.Email, user.VerifiedEmail, user.Name, user.GivenName, user.FamilyName, user.Picture, user.Locale)
+	_, err := db.Exec(statement, user.UserID, user.Email, user.VerifiedEmail, user.Name, user.GivenName, user.FamilyName, user.Picture, user.Locale)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func GetUserByID(id string) (*User, error) {
+	statement := "SELECT user_id, email, verified_email, name, given_name, family_name, picture, locale FROM users WHERE user_id = $1"
+
+	var user User
+	err := db.QueryRow(statement, id).Scan(&user.UserID, &user.Email, &user.VerifiedEmail, &user.Name, &user.GivenName, &user.FamilyName, &user.Picture, &user.Locale)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
