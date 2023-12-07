@@ -1,9 +1,6 @@
--- Enable the use of citext (case-insensitive text)
-CREATE EXTENSION IF NOT EXISTS citext;
-
 CREATE TABLE IF NOT EXISTS users (
 	user_id VARCHAR(255) PRIMARY KEY,
-	email VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL UNIQUE,
 	verified_email BOOLEAN NOT NULL,
 	name VARCHAR(255) NOT NULL,
 	given_name VARCHAR(255) NOT NULL,
@@ -36,8 +33,10 @@ CREATE TABLE IF NOT EXISTS tasks (
 	creator_id VARCHAR(255) not null,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	completed boolean default false, 
+	completer_id VARCHAR(255),
 	FOREIGN KEY(list_id) REFERENCES lists(list_id),
-	FOREIGN KEY(creator_id) REFERENCES users(user_id)
+	FOREIGN KEY(creator_id) REFERENCES users(user_id),
+	FOREIGN KEY(completer_id) REFERENCES users(user_id)
 );
 
 -- Create index for gettings tasks by list

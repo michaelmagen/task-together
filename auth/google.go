@@ -83,7 +83,7 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	log.Info("the user email is:", user.Email, user.UserId)
+	log.Info("the user email is:", user.Email, user.UserID)
 
 	// Add user to db
 	err = model.CreateUserIfNotExist(user)
@@ -100,7 +100,8 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	session.Values["userId"] = user.UserId
+	log.Info("Got here")
+	session.Values["userId"] = string(user.UserID)
 	session.Values["token"] = token
 	// Save the session
 	err = session.Save(r, w)
@@ -177,9 +178,9 @@ func AuthedWithGoogle(next http.Handler) http.Handler {
 				return
 			}
 		}
-
+		log.Info("from middleware:", "userID", userID)
 		// If authenticated, store user information in the context for later use
-		ctx := context.WithValue(r.Context(), "userId", userID)
+		ctx := context.WithValue(r.Context(), "userID", userID)
 
 		// Call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))

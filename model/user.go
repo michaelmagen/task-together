@@ -24,7 +24,7 @@ func CreateUserIfNotExist(user *User) error {
 	return nil
 }
 
-func GetUserByID(id string) (*User, error) {
+func GetUserByID(id UserID) (*User, error) {
 	statement := "SELECT user_id, email, verified_email, name, given_name, family_name, picture, locale FROM users WHERE user_id = $1"
 
 	var user User
@@ -35,4 +35,20 @@ func GetUserByID(id string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func getUserIDFromEmail(email string) (UserID, error) {
+	statement := `
+		SELECT 
+			user_id, 
+		FROM users
+		WHERE email = $1
+	`
+	var userID UserID
+	err := db.QueryRow(statement, email).Scan(&userID)
+	if err != nil {
+		return UserID(""), err
+	}
+
+	return userID, nil
 }

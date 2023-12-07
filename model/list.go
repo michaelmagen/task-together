@@ -38,6 +38,25 @@ func CreateList(listName string, userID UserID) (ListID, error) {
 	return listID, nil
 }
 
+func GetListByID(listID ListID) (*List, error) {
+	statement := `
+		SELECT
+			list_id,
+			name,
+			creator_id,
+			created_at
+		FROM lists
+		WHERE list_id = $1
+	`
+
+	var list List
+	err := db.QueryRow(statement, listID).Scan(&list.ListID, &list.Name, &list.CreatorID, &list.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &list, nil
+}
+
 func GetAllListForUser(userID UserID) ([]List, error) {
 	rows, err := db.Query(`
 		SELECT l.list_id, l.name, l.creator_id, l.created_at
