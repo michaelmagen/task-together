@@ -111,7 +111,7 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: Replace with correct redirect
-	http.Redirect(w, r, "/done", http.StatusFound)
+	http.Redirect(w, r, "http://localhost:8080", http.StatusFound)
 }
 
 // Gets user information from google api using auth token
@@ -180,6 +180,8 @@ func AuthedWithGoogle(next http.Handler) http.Handler {
 		}
 		log.Info("from middleware:", "userID", userID)
 		// If authenticated, store user information in the context for later use
+		// TODO: Fix this warning:
+		// should not use built-in type string as key for value; define your own type to avoid collisions (SA1029)go-staticcheck
 		ctx := context.WithValue(r.Context(), "userID", userID)
 
 		// Call the next handler
