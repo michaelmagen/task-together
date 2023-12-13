@@ -75,6 +75,7 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+	log.Info("Got token from oauth (callback):", "access", token.AccessToken, "refresh", token.RefreshToken, "expiry", token.Expiry)
 
 	// Get user info from google
 	user, err := getUserInfo(token)
@@ -100,7 +101,7 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	log.Info("Got here")
+
 	session.Values["userId"] = string(user.UserID)
 	session.Values["token"] = token
 	// Save the session
@@ -145,20 +146,21 @@ func AuthedWithGoogle(next http.Handler) http.Handler {
 		// Find the current session for user
 		session, err := configs.SessionStore.Get(r, viper.GetString("sessionName"))
 		if err != nil {
-			log.Error("Failed to get sessino in auth middleware", err)
+			log.Error("Failed to get session in auth middleware", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		// Check if userId and token exist in the session
 		userID, okUserID := session.Values["userId"].(string)
 		token, okToken := session.Values["token"].(*oauth2.Token)
 
 		if !okUserID || !okToken {
 			log.Error("could not find token or id in session")
+			log.Warn("from middleware:", "okUserID", okUserID, "okToken", okToken)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		// TODO: To get refresh from google, need to show prompt. To avoid showing it eevery time, must store it persistenly. As of now, shows prompt every time to get refresh token
 
 		// Refresh token if need and update session
 		newToken, tokenWasRefreshed, err := refreshAuthToken(token)
@@ -178,7 +180,6 @@ func AuthedWithGoogle(next http.Handler) http.Handler {
 				return
 			}
 		}
-		log.Info("from middleware:", "userID", userID)
 		// If authenticated, store user information in the context for later use
 		// TODO: Fix this warning:
 		// should not use built-in type string as key for value; define your own type to avoid collisions (SA1029)go-staticcheck
