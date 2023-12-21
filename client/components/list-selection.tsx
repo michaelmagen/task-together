@@ -13,6 +13,7 @@ import { ListChecks } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function ListSelection() {
+	// TODO: Move this so zustand store so state persists even if sidebar gone (like in mobile)
 	const [selectedListID, setSelectedListID] = useState<number>();
 	const { cookies } = useCookieStore()
 	const fetcherOptions: FetcherOptions = {

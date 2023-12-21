@@ -2,6 +2,7 @@ import useCookieStore from "@/lib/stores";
 import { cookies } from "next/headers";
 import React from "react";
 import Sidebar from "@/components/sidebar"
+import { MobileSidebar } from "@/components/mobile-sidebar";
 
 
 export default async function Home() {
@@ -17,7 +18,10 @@ export default async function Home() {
 
 	return (
 		<main className="flex overflow-hidden">
-			<Sidebar />
+			<div className="hidden w-full overflow-hidden md:flex">
+				<Sidebar />
+			</div>
+			<MobileSidebar />
 		</main>
 	);
 }
