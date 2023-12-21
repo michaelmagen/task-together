@@ -2,7 +2,7 @@ import { z } from "zod";
 
 type ListID = number;
 type UserID = string;
-type List = {
+export type List = {
 	list_id: ListID;
 	name: string;
 	creator_id: UserID;

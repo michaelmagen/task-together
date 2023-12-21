@@ -11,6 +11,7 @@ import (
 	"github.com/michaelmagen/task-together/configs"
 	"github.com/michaelmagen/task-together/model"
 	"github.com/michaelmagen/task-together/routes"
+	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 )
 
@@ -43,7 +44,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"*", "http://localhost:8080"},
+		AllowedOrigins: []string{viper.GetString("frontendURL")},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"X-Requested-With", "Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
@@ -67,5 +68,5 @@ func main() {
 	r.Get("/login", auth.HandleGoogleLogin)
 	r.Get("/auth/callback", auth.CallbackGoogleOauth)
 
-	http.ListenAndServe(":3000", r)
+	http.ListenAndServe(":8080", r)
 }

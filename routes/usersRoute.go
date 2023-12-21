@@ -12,7 +12,6 @@ import (
 func UsersRoute(r chi.Router) {
 	r.Get("/", getLoggedInUser)
 	r.Get("/{userID}", getUserHandler)
-	r.Get("/lists", userListsHandler)
 }
 
 func getLoggedInUser(w http.ResponseWriter, r *http.Request) {
@@ -42,33 +41,6 @@ func getLoggedInUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-}
-
-func userListsHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract userID from the context
-	userID, err := getUserIDFromRequest(r)
-	if err != nil {
-		log.Error("/list/all:", "err", err)
-		http.Error(w, "Could not get lists", http.StatusInternalServerError)
-		return
-	}
-
-	lists, err := model.GetAllListForUser(userID)
-	if err != nil {
-		log.Error("Failed to get all lists for user", "err", err)
-		http.Error(w, "Could not get lists", http.StatusInternalServerError)
-		return
-	}
-
-	// Set the Content-Type header to indicate JSON
-	w.Header().Set("Content-Type", "application/json")
-
-	// Use json.NewEncoder to directly encode and write to the response writer
-	if err := json.NewEncoder(w).Encode(lists); err != nil {
-		log.Error("Failed to encode lists", "err", err)
-		http.Error(w, "Could not get lists", http.StatusInternalServerError)
-		return
-	}
 }
 
 func getUserHandler(w http.ResponseWriter, r *http.Request) {

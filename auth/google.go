@@ -21,7 +21,7 @@ var (
 	oauthConfGl = &oauth2.Config{
 		ClientID:     "",
 		ClientSecret: "",
-		RedirectURL:  "http://localhost:3000/auth/callback",
+		RedirectURL:  "http://localhost:8080/auth/callback",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
@@ -112,7 +112,7 @@ func CallbackGoogleOauth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: Replace with correct redirect
-	http.Redirect(w, r, "http://localhost:8080", http.StatusFound)
+	http.Redirect(w, r, viper.GetString("frontendURL"), http.StatusFound)
 }
 
 // Gets user information from google api using auth token
