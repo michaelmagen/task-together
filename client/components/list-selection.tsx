@@ -54,7 +54,6 @@ export default function ListSelection() {
 					</Button>
 					<Separator className="my-2" />
 				</div>
-
 			))}
 		</ScrollArea>
 	);

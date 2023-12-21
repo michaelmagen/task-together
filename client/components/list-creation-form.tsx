@@ -26,6 +26,8 @@ import { useForm } from "react-hook-form"
 import fetcher, { Endpoint, FetcherOptions, Method } from "@/lib/fetcher";
 import useCookieStore from "@/lib/stores";
 import type { List } from "@/lib/typeValidators";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
 	name: z.string().min(1, {
@@ -36,9 +38,12 @@ const formSchema = z.object({
 })
 
 export function ListCreationForm() {
+	const [open, setOpen] = useState(false)
 	const { cookies } = useCookieStore()
 	const listMutator = (key: Endpoint, { arg }: { arg: FetcherOptions }) => fetcher(key, arg)
-	const { trigger, isMutating, } = useSWRMutation<List, Error, Endpoint, FetcherOptions>(Endpoint.USER_LISTS, listMutator)
+	const { trigger, isMutating } = useSWRMutation<List, Error, Endpoint, FetcherOptions>(Endpoint.USER_LISTS, listMutator, {
+		onSuccess: () => setOpen(false)
+	})
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -53,16 +58,13 @@ export function ListCreationForm() {
 			cookieString: cookies,
 			body: values,
 		}
-		console.log(values)
-		console.log(fetcherOptions)
 		trigger(fetcherOptions)
-		console.log(isMutating)
 	}
 
 	return (
-		<Dialog>
+		<Dialog open={open}>
 			<DialogTrigger asChild>
-				<Button className="mt-2 w-full">
+				<Button className="mt-2 w-full" onClick={() => setOpen(true)}>
 					<PlusIcon className="mr-2 h-4 w-4" />
 					<span>Create New List</span>
 				</Button>
@@ -93,7 +95,8 @@ export function ListCreationForm() {
 							)}
 						/>
 						<DialogFooter>
-							<Button type="submit">Create List</Button>
+							<Button type="submit">{
+								isMutating ? <Loader2 className="animate-spin" /> : "Create List"}</Button>
 						</DialogFooter>
 					</form>
 				</Form>
