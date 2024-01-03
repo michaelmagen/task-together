@@ -1,8 +1,9 @@
-import useCookieStore from "@/lib/stores";
+import useCookieStore from "@/lib/stores/cookieStore";
 import { cookies } from "next/headers";
 import React from "react";
 import Sidebar from "@/components/sidebar"
 import { MobileSidebar } from "@/components/mobile-sidebar";
+import TasksDisplay from "@/components/tasks-display";
 
 
 export default async function Home() {
@@ -18,10 +19,11 @@ export default async function Home() {
 
 	return (
 		<main className="flex overflow-hidden">
-			<div className="hidden w-full overflow-hidden md:flex">
+			<div className="hidden overflow-hidden md:flex">
 				<Sidebar />
 			</div>
 			<MobileSidebar />
+			<TasksDisplay />
 		</main>
 	);
 }

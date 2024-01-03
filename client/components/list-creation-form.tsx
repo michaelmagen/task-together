@@ -24,7 +24,7 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import fetcher, { Endpoint, FetcherOptions, Method } from "@/lib/fetcher";
-import useCookieStore from "@/lib/stores";
+import useCookieStore from "@/lib/stores/cookieStore";
 import type { List } from "@/lib/typeValidators";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";

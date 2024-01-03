@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-type ListID = number;
+export type ListID = number;
 type UserID = string;
 export type List = {
 	list_id: ListID;

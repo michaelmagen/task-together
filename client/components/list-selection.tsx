@@ -5,16 +5,15 @@ import fetcher, { Endpoint, FetcherOptions, Method } from "@/lib/fetcher";
 import { List } from "@/lib/typeValidators";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import useCookieStore from "@/lib/stores";
+import useListStore from "@/lib/stores/listStore";
+import useCookieStore from "@/lib/stores/cookieStore";
 import Loading from "./loading";
 import { Separator } from "@/components/ui/separator"
 import { ListChecks } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function ListSelection() {
-	// TODO: Move this so zustand store so state persists even if sidebar gone (like in mobile)
-	const [selectedListID, setSelectedListID] = useState<number>();
+	const { listID, updateListID } = useListStore()
 	const { cookies } = useCookieStore()
 	const fetcherOptions: FetcherOptions = {
 		method: Method.GET,
@@ -43,12 +42,12 @@ export default function ListSelection() {
 					<Button
 						variant="ghost"
 						className={cn(
-							selectedListID === list.list_id
+							listID === list.list_id
 								? "bg-muted hover:bg-muted"
 								: "hover:bg-transparent hover:underline",
 							"w-full justify-start"
 						)}
-						onClick={() => setSelectedListID(list.list_id)}
+						onClick={() => updateListID(list.list_id)}
 					>
 						<ListChecks className="mr-2" />
 						{list.name}
