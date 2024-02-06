@@ -20,7 +20,7 @@ export default function RootLayout({
     <>
       <html lang="en" suppressHydrationWarning={true}>
         <head />
-        <body>
+        <body className=" flex h-screen flex-col">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

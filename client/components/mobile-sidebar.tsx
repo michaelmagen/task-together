@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { AlignJustify } from "lucide-react"
 
+// TODO: Make sidebar close when a list is selected
 export function MobileSidebar() {
     return (
         <Sheet>

@@ -15,10 +15,12 @@ export default function UserCard({ user }: UserCardProps) {
 	return (
 		<HoverCard>
 			<HoverCardTrigger asChild>
-				<Button variant="link">{user.name}</Button>
+				<Button variant="link" className="h-4 p-0 text-sm">
+					{user.name}
+				</Button>
 			</HoverCardTrigger>
 			<HoverCardContent className="w-auto">
-				<div className="flex justify-between space-x-4 items-center">
+				<div className="flex items-center justify-between space-x-4">
 					<Avatar>
 						<AvatarImage
 							src={user.picture}

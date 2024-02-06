@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR, { Fetcher } from "swr";
-import fetcher, { Endpoint, FetcherOptions, Method } from "@/lib/fetcher";
+import fetcher, { FetcherOptions, Method, endpoints } from "@/lib/fetcher";
 import { List } from "@/lib/typeValidators";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -13,15 +13,15 @@ import { ListChecks } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function ListSelection() {
-	const { listID, updateListID } = useListStore()
+	const { selectedList, updateSelectedList } = useListStore()
 	const { cookies } = useCookieStore()
 	const fetcherOptions: FetcherOptions = {
 		method: Method.GET,
 		cookieString: cookies
 	}
 
-	const listFetcher: Fetcher<List[], Endpoint.USER_LISTS> = (endpoint) => fetcher(endpoint, fetcherOptions)
-	const { data, error, isLoading } = useSWR(Endpoint.USER_LISTS, listFetcher)
+	const listFetcher: Fetcher<List[], string> = (endpoint) => fetcher(endpoint, fetcherOptions)
+	const { data, error, isLoading } = useSWR(endpoints.user_lists, listFetcher)
 
 	if (isLoading) {
 		return <Loading />;
@@ -42,12 +42,12 @@ export default function ListSelection() {
 					<Button
 						variant="ghost"
 						className={cn(
-							listID === list.list_id
+							selectedList?.list_id === list.list_id
 								? "bg-muted hover:bg-muted"
 								: "hover:bg-transparent hover:underline",
 							"w-full justify-start"
 						)}
-						onClick={() => updateListID(list.list_id)}
+						onClick={() => updateSelectedList(list)}
 					>
 						<ListChecks className="mr-2" />
 						{list.name}

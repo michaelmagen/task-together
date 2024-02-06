@@ -1,17 +1,16 @@
 import { create } from 'zustand'
-import type { ListID } from '../typeValidators';
+import type { List } from '../typeValidators';
 
 type ListStoreState = {
-	listID: ListID | null,
+	selectedList?: List,
 }
 
 type ListStoreActions = {
-	updateListID: (listID: ListStoreState['listID']) => void
+	updateSelectedList: (list: ListStoreState['selectedList']) => void
 }
 
 const useListStore = create<ListStoreState & ListStoreActions>((set) => ({
-	listID: null,
-	updateListID: (listID) => set(() => ({ listID: listID }))
+	updateSelectedList: (list) => set(() => ({ selectedList: list }))
 }))
 
 export default useListStore;

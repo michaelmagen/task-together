@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+
 export default function Loading() {
 	return (
 		<div className="text-muted-foreground flex items-center justify-center">
@@ -7,5 +8,5 @@ export default function Loading() {
 				<div className="text-sm">Loading...</div>
 			</div>
 		</div>
-	)
+	);
 }

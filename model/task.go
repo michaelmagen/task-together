@@ -8,15 +8,15 @@ import (
 type TaskID int
 
 type Task struct {
-	TaskID      TaskID    `json:"task_id"`
-	Content     string    `json:"content"`
-	ListID      ListID    `json:"list_id"`
-	CreatorID   UserID    `json:"creator_id"`
-	CompleterID UserID    `json:"completer_id,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	Completed   bool      `json:"completed"`
-	Creator     *User     `json:"creator"`
-	Completer   *User     `json:"completer,omitempty"`
+	TaskID      TaskID         `json:"task_id"`
+	Content     string         `json:"content"`
+	ListID      ListID         `json:"list_id"`
+	CreatorID   UserID         `json:"creator_id"`
+	CompleterID NullableUserID `json:"completer_id,omitempty"`
+	CreatedAt   time.Time      `json:"created_at"`
+	Completed   bool           `json:"completed"`
+	Creator     *User          `json:"creator"`
+	Completer   *User          `json:"completer,omitempty"`
 }
 
 func CreateTask(content string, listID ListID, creatorID UserID) (*Task, error) {
@@ -146,13 +146,12 @@ func attachCreatorAndCompleterInfo(task *Task) error {
 	}
 
 	// If task has a completer, fetch completer information
-	if task.CompleterID != "" {
-		task.Completer, err = GetUserByID(task.CompleterID)
+	if task.CompleterID.Valid {
+		task.Completer, err = GetUserByID(task.CompleterID.GetID())
 		if err != nil {
 			log.Error("Fail to fetch completer information", "err", err)
 			return err
 		}
 	}
-
 	return nil
 }

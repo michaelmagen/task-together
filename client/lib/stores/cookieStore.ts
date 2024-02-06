@@ -1,11 +1,13 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 type CookieStore = {
-	cookies: string,
-}
+	cookies: string;
+	updateCookies: (cookies: string) => void;
+};
 
-const useCookieStore = create<CookieStore>(() => ({
+const useCookieStore = create<CookieStore>((set) => ({
 	cookies: "",
-}))
+	updateCookies: (cookies) => set(() => ({ cookies: cookies })),
+}));
 
 export default useCookieStore;

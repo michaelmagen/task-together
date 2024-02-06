@@ -89,7 +89,6 @@ func createTaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Return created task
 	w.Header().Set("Content-Type", "application/json")
 
-	// TODO: Might be better just to return the task id here instead of the whole task
 	// Encode task as json and send as response
 	if err := json.NewEncoder(w).Encode(task); err != nil {
 		log.Error("Failed to encode task", "err", err)
@@ -122,10 +121,11 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type toggleTaskRequestBody struct {
-	Completed string `json:"completed"`
+	Completed bool `json:"completed"`
 }
 
 func toggleTaskCompletionHandler(w http.ResponseWriter, r *http.Request) {
+	log.Info("In handler for Patch tasks")
 	// Get user id
 	userID, err := getUserIDFromRequest(r)
 	if err != nil {
@@ -147,18 +147,12 @@ func toggleTaskCompletionHandler(w http.ResponseWriter, r *http.Request) {
 	var requestBody toggleTaskRequestBody
 	err = json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
-		log.Error("toogleTaskCompletionHandler:", "err", err)
+		log.Error("togleTaskCompletionHandler:", "err", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Convert completion into boolean
-	completed, err := strconv.ParseBool(requestBody.Completed)
-	if err != nil {
-		log.Error("toogleTaskCompletionHandler:", "err", err)
-		http.Error(w, "completed must be a boolean", http.StatusBadRequest)
-		return
-	}
+	completed := requestBody.Completed
 
 	err = model.UpdateTaskCompletion(completed, taskID, userID)
 	if err != nil {
@@ -168,6 +162,10 @@ func toggleTaskCompletionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Send the new updated task through the websocket
-	// Successful deletion, send a 204 No Content response
-	w.WriteHeader(http.StatusNoContent)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(taskID); err != nil {
+		log.Error("Failed to encode task id in task completion", "err", err)
+		http.Error(w, "Could not modify task", http.StatusInternalServerError)
+		return
+	}
 }

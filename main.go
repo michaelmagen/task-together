@@ -43,10 +43,9 @@ func main() {
 	// Middleware
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{viper.GetString("frontendURL")},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"X-Requested-With", "Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
@@ -54,19 +53,11 @@ func main() {
 	}))
 
 	// Routes
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
-	})
-
 	r.With(auth.AuthedWithGoogle).Route("/users", routes.UsersRoute)
 	r.With(auth.AuthedWithGoogle).Route("/lists", routes.ListsRoute)
 	r.With(auth.AuthedWithGoogle).Route("/invitations", routes.InvitationsRoute)
-	r.With(auth.AuthedWithGoogle).Get("/done", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("in protected route"))
-	})
-
 	r.Get("/login", auth.HandleGoogleLogin)
 	r.Get("/auth/callback", auth.CallbackGoogleOauth)
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(viper.GetString("PORT"), r)
 }

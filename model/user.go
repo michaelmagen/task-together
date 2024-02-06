@@ -1,6 +1,18 @@
 package model
 
+import (
+	"database/sql"
+)
+
 type UserID string
+
+type NullableUserID struct {
+	sql.NullString
+}
+
+func (nu NullableUserID) GetID() UserID {
+	return UserID(nu.String)
+}
 
 type User struct {
 	UserID        UserID `json:"id"`
