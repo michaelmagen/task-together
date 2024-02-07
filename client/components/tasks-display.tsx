@@ -1,7 +1,7 @@
 "use client";
 
 import useSWRMutation from "swr/mutation";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import useListStore from "@/lib/stores/listStore";
 import useCookieStore from "@/lib/stores/cookieStore";
 import { endpoints, FetcherOptions, Method } from "@/lib/fetcher";
@@ -82,6 +82,7 @@ function Task({ task: initialTask }: TaskProps) {
   const { cookies } = useCookieStore();
   const { user } = useUserStore();
   const [task, setTask] = useState(initialTask);
+  const { mutate } = useSWRConfig();
 
   const taskCompleteMutation = (
     key: string,
@@ -102,13 +103,9 @@ function Task({ task: initialTask }: TaskProps) {
         completed: !task.completed,
       },
     };
-    if (user === null) {
-      console.log("user is null");
-    }
 
     let newTask: Task = { ...task };
     if (!task.completed && user !== null) {
-      console.log("putting user");
       newTask.completed = true;
       newTask.completer = user;
       newTask.completer_id = user.id;
@@ -117,11 +114,12 @@ function Task({ task: initialTask }: TaskProps) {
       const { completer, completer_id, ...taskWithoutCompleter } = newTask;
       newTask = taskWithoutCompleter;
     }
+
     trigger(fetcherOptions, {
       optimisticData: () => setTask(newTask),
       rollbackOnError: true,
+      onSuccess: () => mutate(endpoints.tasks(task.list_id)),
     });
-    // TODO: Make this refetch the task when it is done, or update the task with returned data from server
   };
 
   return (

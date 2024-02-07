@@ -37,7 +37,6 @@ export default async function fetcher(
 		credentials: "include",
 		body: body ? JSON.stringify(body) : null,
 	});
-	console.log(response);
 
 	if (!response.ok) {
 		throw new Error(`(Fetcher) Failed to fetch ${endpoint}`);
