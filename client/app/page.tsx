@@ -1,4 +1,3 @@
-import useCookieStore from "@/lib/stores/cookieStore";
 import { cookies } from "next/headers";
 import React from "react";
 import Sidebar from "@/components/sidebar";

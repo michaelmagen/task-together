@@ -14,6 +14,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import UserCard from "./user-card";
 import { PropsWithChildren, useState } from "react";
 import useUserStore from "@/lib/stores/userStore";
+import useTaskStore from "@/lib/stores/taskStore";
 
 export default function TasksDisplay() {
   const { selectedList } = useListStore();
@@ -39,6 +40,8 @@ interface TaskTableProps {
 
 function TaskTable({ listID }: TaskTableProps) {
   const { cookies } = useCookieStore();
+  const { getTasksForList, addList, removeList } = useTaskStore();
+
   const fetcherOptions: FetcherOptions = {
     method: Method.GET,
     cookieString: cookies,
@@ -48,6 +51,12 @@ function TaskTable({ listID }: TaskTableProps) {
   const { data, error, isLoading } = useSWR(
     endpoints.tasks(listID),
     taskFetcher,
+    {
+      onSuccess: (data) => {
+        removeList(listID);
+        addList(listID, data);
+      },
+    },
   );
 
   if (isLoading) {
@@ -67,7 +76,7 @@ function TaskTable({ listID }: TaskTableProps) {
   // TODO: Make this a scroll view
   return (
     <div className="flex w-full flex-col items-center gap-4 p-4">
-      {data.map((task) => (
+      {getTasksForList(listID).map((task) => (
         <Task task={task} key={task.task_id} />
       ))}
     </div>
@@ -78,11 +87,10 @@ interface TaskProps {
   task: Task;
 }
 
-function Task({ task: initialTask }: TaskProps) {
+function Task({ task }: TaskProps) {
   const { cookies } = useCookieStore();
   const { user } = useUserStore();
-  const [task, setTask] = useState(initialTask);
-  const { mutate } = useSWRConfig();
+  const { updateTaskInList } = useTaskStore();
 
   const taskCompleteMutation = (
     key: string,
@@ -116,9 +124,7 @@ function Task({ task: initialTask }: TaskProps) {
     }
 
     trigger(fetcherOptions, {
-      optimisticData: () => setTask(newTask),
-      rollbackOnError: true,
-      onSuccess: () => mutate(endpoints.tasks(task.list_id)),
+      onSuccess: () => updateTaskInList(newTask.list_id, newTask),
     });
   };
 
